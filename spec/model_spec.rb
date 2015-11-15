@@ -89,4 +89,37 @@ describe Xmoney::Model do
       expect("#{ten_usd * ten_eur}").to eq('80 USD')
     end
   end
+
+  describe '#/' do
+    before { configure }
+    let(:ten_eur) { Money.new(10, 'EUR') }
+    let(:ten_usd) { Money.new(10, 'USD') }
+
+    specify do
+      expect("#{ten_eur / ten_usd}").to eq('0.83 EUR')
+    end
+    specify do
+      expect("#{ten_usd / ten_eur}").to eq('1.25 USD')
+    end
+  end
+
+  describe 'comparable' do
+    before { configure }
+
+    context '#==' do
+      specify do
+        expect(Money.new(10, 'EUR') == Money.new(10, 'USD')).to be_falsey
+        expect(Money.new(10, 'USD') == Money.new(10, 'USD')).to be_truthy
+        expect(Money.new(12, 'EUR') == Money.new(10, 'USD')).to be_truthy
+        expect(Money.new(12.213, 'EUR') == Money.new(12.215, 'EUR')).to be_truthy
+      end
+    end
+
+    context '#<=>' do
+      specify do
+        expect(Money.new(10, 'EUR') > Money.new(10, 'USD')).to be_falsey
+        expect(Money.new(10, 'USD') > Money.new(10, 'EUR')).to be_truthy
+      end
+    end
+  end
 end
