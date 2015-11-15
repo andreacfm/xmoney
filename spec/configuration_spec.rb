@@ -4,7 +4,7 @@ describe Xmoney do
   describe 'configure' do
     context 'with valida data' do
       before do
-        Xmoney.conversion_rates do
+        Xmoney.configure do
           add_currency 'EURO', { 'USD' => 0.80 }
           add_currency 'USD', { 'EURO' => 1.20 }
         end
@@ -19,7 +19,7 @@ describe Xmoney do
 
     context 'with missing config' do
       specify do
-        expect { Xmoney.conversion_rates }.to raise_error Xmoney::MISSING_CONFIGURATION
+        expect { Xmoney.configure }.to raise_error Xmoney::MISSING_CONFIGURATION
       end
     end
   end

@@ -1,21 +1,20 @@
 require 'xmoney/version'
 require 'xmoney/configuration'
 require 'xmoney/model'
+require 'xmoney/exceptions'
 
 module Xmoney
-  MISSING_CONFIGURATION = Class.new(StandardError)
-
-  class << self
-    attr_accessor :configuration
-  end
 
   def self.new(amount,currency)
     Instance.new(amount,currency)
   end
 
-  def self.conversion_rates(&block)
+  def self.configuration
+    @_configuration ||= Configuration.new
+  end
+
+  def self.configure(&block)
     fail(MISSING_CONFIGURATION) unless block_given?
-    self.configuration ||= Configuration.new
     self.configuration.setup(&block)
   end
 
