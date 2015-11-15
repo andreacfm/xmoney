@@ -22,6 +22,10 @@ module Xmoney
     self.configuration.currencies
   end
 
+  def self.reset!
+    @_configuration = Configuration.new
+  end
+
   class Instance
     include Xmoney::Model
   end
