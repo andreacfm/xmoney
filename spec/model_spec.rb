@@ -5,6 +5,13 @@ describe Xmoney::Model do
     include Xmoney::Model
   end
 
+  def configure
+    Xmoney.configure do
+      add_currency 'EUR', { 'USD' => 0.80 }
+      add_currency 'USD', { 'EUR' => 1.20 }
+    end
+  end
+
   describe 'instance' do
     context 'when the currency in unknown' do
       specify do
@@ -15,12 +22,7 @@ describe Xmoney::Model do
     context 'given a proper configuration' do
       let(:usd) { Money.new(50.01, 'USD') }
       let(:eur) { Money.new(10.12, 'EUR') }
-      before do
-        Xmoney.configure do
-          add_currency 'EUR', { 'USD' => 0.80 }
-          add_currency 'USD', { 'EUR' => 1.20 }
-        end
-      end
+      before { configure }
 
       specify do
         expect(usd.amount).to eq(50.01)
@@ -34,19 +36,57 @@ describe Xmoney::Model do
   end
 
   describe '#convert_to' do
-    before do
-      Xmoney.configure do
-        add_currency 'EUR', { 'USD' => 0.80 }
-        add_currency 'USD', { 'EUR' => 1.20 }
-      end
-    end
+    before { configure }
 
     specify do
       expect { Money.new(10, 'EUR').convert_to('BITCOIN') }.to raise_error Xmoney::UNKNOWN_CURRENCY
     end
     specify do
-       expect(Money.new(10, 'EUR').convert_to('USD')).to eq('8 USD')
-       expect(Money.new(16, 'USD').convert_to('EUR')).to eq('19.2 EUR')
+      expect(Money.new(10, 'EUR').convert_to('USD').to_s).to eq('8 USD')
+      expect(Money.new(16, 'USD').convert_to('EUR').to_s).to eq('19.2 EUR')
+    end
+  end
+
+  describe '#+' do
+    before { configure }
+    let(:ten_eur) { Money.new(10, 'EUR') }
+    let(:ten_usd) { Money.new(10, 'USD') }
+
+    specify do
+      expect("#{ten_eur + ten_usd}").to eq('22 EUR')
+    end
+    specify do
+      expect("#{ten_usd + ten_eur}").to eq('18 USD')
+    end
+    specify do
+      expect("#{ten_usd + ten_eur}").to eq('18 USD')
+      expect("#{ten_eur + ten_usd}").to eq('31.6 EUR')
+    end
+  end
+
+  describe '#-' do
+    before { configure }
+    let(:twenty_eur) { Money.new(20, 'EUR') }
+    let(:ten_usd) { Money.new(10, 'USD') }
+
+    specify do
+      expect("#{twenty_eur - ten_usd}").to eq('8 EUR')
+    end
+    specify do
+      expect("#{ten_usd - twenty_eur}").to eq('-6 USD')
+    end
+  end
+
+  describe '#*' do
+    before { configure }
+    let(:ten_eur) { Money.new(10, 'EUR') }
+    let(:ten_usd) { Money.new(10, 'USD') }
+
+    specify do
+      expect("#{ten_eur * ten_usd}").to eq('120 EUR')
+    end
+    specify do
+      expect("#{ten_usd * ten_eur}").to eq('80 USD')
     end
   end
 end

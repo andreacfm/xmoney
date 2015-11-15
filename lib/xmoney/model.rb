@@ -20,7 +20,28 @@ module Xmoney
       current_currency = find_currency(currency)
       fail(UNKNOWN_CURRENCY, "Unknown currency [#{new_currency}]") unless current_currency[:conversions].has_key?(new_currency)
       converted_amount  = amount * current_currency[:conversions][new_currency]
-      self.class.new(converted_amount, new_currency).to_s
+      self.class.new(converted_amount, new_currency)
+    end
+
+    def +(xmoney)
+      converted_amount = xmoney.convert_to(currency).amount
+      self.tap do |instance|
+        instance.amount += converted_amount
+      end
+    end
+
+    def -(xmoney)
+      converted_amount = xmoney.convert_to(currency).amount
+      self.tap do |instance|
+        instance.amount -= converted_amount
+      end
+    end
+
+    def *(xmoney)
+      converted_amount = xmoney.convert_to(currency).amount
+      self.tap do |instance|
+        instance.amount *= converted_amount
+      end
     end
 
     private
